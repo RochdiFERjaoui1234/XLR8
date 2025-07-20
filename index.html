@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XLR8 - Windows Optimizer</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .section { margin: 20px; }
+        .process, .suggestion, .alert { padding: 10px; border-bottom: 1px solid #ccc; }
+        button { margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h1>XLR8 - Windows Optimizer</h1>
+    <button id="turbo-btn">Enable Turbo Mode</button>
+
+    <div class="section">
+        <h2>Processes</h2>
+        <div id="process-list"></div>
+    </div>
+
+    <div class="section">
+        <h2>Optimization Suggestions</h2>
+        <div id="optimization-suggestions"></div>
+    </div>
+
+    <div class="section">
+        <h2>Malware Alerts</h2>
+        <div id="malware-alerts"></div>
+    </div>
+
+    <div class="section">
+        <h2>Virtualization Suggestions</h2>
+        <div id="virtualization-suggestions"></div>
+    </div>
+
+    <script type="module">
+        import { invoke, listen } from '@tauri-apps/api';
+
+        window.freeze = async (pid) => await invoke('freeze_process', { pid });
+        window.resume = async (pid) => await invoke('resume_process', { pid });
+
+        listen('update_processes', (event) => {
+            const processes = event.payload;
+            document.getElementById('process-list').innerHTML = processes.map(p => `
+                <div class="process">
+                    PID: ${p.pid} | Name: ${p.name} | Memory: ${(p.memory_usage / 1024 / 1024).toFixed(2)} MB | 
+                    Status: ${p.status}
+                    <button onclick="freeze(${p.pid})">Freeze</button>
+                    <button onclick="resume(${p.pid})">Resume</button>
+                </div>
+            `).join('');
+        });
+
+        listen('optimization_suggestions', (event) => {
+            const suggestions = event.payload;
+            document.getElementById('optimization-suggestions').innerHTML = suggestions.map(s => `
+                <div class="suggestion">
+                    PID: ${s.pid} | Name: ${s.name} | Reason: ${s.reason}
+                </div>
+            `).join('');
+        });
+
+        listen('malware_alerts', (event) => {
+            const alerts = event.payload;
+            document.getElementById('malware-alerts').innerHTML = alerts.map(a => `
+                <div class="alert">
+                    PID: ${a.pid} | Name: ${a.name} | Rule: ${a.rule}
+                </div>
+            `).join('');
+        });
+
+        listen('virtualization_suggestions', (event) => {
+            const suggestions = event.payload;
+            document.getElementById('virtualization-suggestions').innerHTML = suggestions.map(s => `
+                <div class="suggestion">
+                    Name: ${s.name} | Reason: ${s.reason}
+                </div>
+            `).join('');
+        });
+
+        document.getElementById('turbo-btn').addEventListener('click', async () => {
+            await invoke('enable_turbo_mode');
+            alert('Turbo Mode enabled!');
+        });
+    </script>
+</body>
+</html>

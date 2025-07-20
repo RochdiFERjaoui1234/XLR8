@@ -1,0 +1,32 @@
+```toml
+[package]
+name = "xlr8"
+version = "0.1.0"
+description = "A Windows system optimizer with process monitoring, ML optimization, security scanning, and virtualization"
+authors = ["Rochdi Ferjaoui <rochdi.ferjaoui@example.com>"]
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+tauri = { version = "1.7", features = ["api-all"] }
+winapi = { version = "0.3", features = ["processthreadsapi", "psapi", "winnt", "handleapi", "tlhelp32"] }
+sysinfo = "0.29"
+smartcore = { version = "0.3", features = ["serde"] }
+yara = "0.25"
+shiplift = "0.7"
+serde = { version = "1.0", features = ["derive"] }
+async-std = "1.12"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[features]
+# Add custom-tauri-hooks if you need Tauri build hooks
+default = ["custom-tauri-hooks"]
+custom-tauri-hooks = []
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+```
